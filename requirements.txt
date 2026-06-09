@@ -1,0 +1,3 @@
+streamlit
+joblib
+humanize/Users/vihaan/pickle-to-joblib
