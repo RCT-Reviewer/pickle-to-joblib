@@ -1,5 +1,9 @@
-
 ![Preview](assets/pickle-to-joblib.png)
+
+[![CI](https://github.com/RCT-Reviewer/pickle-to-joblib/actions/workflows/ci.yml/badge.svg)](https://github.com/RCT-Reviewer/pickle-to-joblib/actions/workflows/ci.yml)
+
+
+*"When life gives you .pickles, make .joblib!"*
 
 
 As the name suggests, this tool converts `.pickle` / `.pkl` / `.pck` machine learning model files into compressed `.joblib` files.

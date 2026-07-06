@@ -1,11 +1,10 @@
+
 import streamlit as st
-import pickle
-import joblib
 import os
 import sys
 import tempfile
-import humanize
-import importlib
+
+from converter import convert_pickle_to_joblib, format_bytes, calculate_reduction, generate_output_filename
 
 st.set_page_config(page_title="Pickle ➔ Joblib", layout="centered")
 
@@ -14,7 +13,6 @@ st.write(
     "Upload your `.pickle` or `.pck` files. This app compresses them to reduce size. "
     "If your files use custom classes (like 'rationale_CNN'), upload the missing .py files below first."
 )
-
 
 st.subheader("Custom Dependencies")
 st.info(
@@ -28,18 +26,15 @@ dependency_files = st.file_uploader(
 )
 
 if dependency_files:
-
     temp_dep_dir = tempfile.mkdtemp()
     if temp_dep_dir not in sys.path:
         sys.path.append(temp_dep_dir)
     
     for dep in dependency_files:
-        
         dep_path = os.path.join(temp_dep_dir, dep.name)
         with open(dep_path, "wb") as f:
             f.write(dep.getbuffer())
         st.success(f"✅ Loaded module: {dep.name}")
-
 
 st.divider()
 
@@ -49,56 +44,30 @@ uploaded_files = st.file_uploader(
     accept_multiple_files=True
 )
 
-def format_bytes(size):
-    return humanize.naturalsize(size)
-
 if uploaded_files:
     st.info(f"Found {len(uploaded_files)} file(s) to convert.")
-    
     progress_bar = st.progress(0)
     
     for i, uploaded_file in enumerate(uploaded_files):
-        # Calculate progress
         progress = (i + 1) / len(uploaded_files)
         progress_bar.progress(progress)
         
         with st.expander(f"**Processing: {uploaded_file.name}**", expanded=True):
             try:
-         
                 original_size = uploaded_file.size
                 st.text(f"Original Size: {format_bytes(original_size)}")
                 
+                joblib_bytes, orig, comp = convert_pickle_to_joblib(uploaded_file.getbuffer())
                 
-                suffix = os.path.splitext(uploaded_file.name)[1]
-                with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_in:
-                    tmp_in.write(uploaded_file.getbuffer())
-                    tmp_in_path = tmp_in.name
-                
-                
-                with open(tmp_in_path, 'rb') as f:
-                    obj = pickle.load(f)
-                
-            
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".joblib") as tmp_out:
-                    tmp_out_path = tmp_out.name
-                
-                joblib.dump(obj, tmp_out_path, compress=3)
-                
-            
-                new_size = os.path.getsize(tmp_out_path)
-                reduction = 100 - ((new_size / original_size) * 100)
+                reduction = calculate_reduction(orig, comp)
                 
                 st.metric(
                     label="Compressed Size", 
-                    value=format_bytes(new_size),
+                    value=format_bytes(comp),
                     delta=f"-{reduction:.1f}% size reduction"
                 )
                 
-      
-                with open(tmp_out_path, "rb") as f:
-                    joblib_bytes = f.read()
-
-                new_filename = os.path.splitext(uploaded_file.name)[0] + ".joblib"
+                new_filename = generate_output_filename(uploaded_file.name)
                 
                 st.download_button(
                     label=f"⬇️ Download {new_filename}",
@@ -107,13 +76,8 @@ if uploaded_files:
                     mime="application/octet-stream",
                     key=f"dl_{uploaded_file.name}_{i}"
                 )
-                
-   
-                os.remove(tmp_in_path)
-                os.remove(tmp_out_path)
 
             except ModuleNotFoundError as e:
-               
                 missing_module = str(e).split("'")[-2]
                 st.error(f"❌ **Missing Python Module:** `{missing_module}`")
                 st.warning(
@@ -126,13 +90,10 @@ if uploaded_files:
                 st.code(str(e))
                 
     progress_bar.empty()
-
 else:
     st.warning("Please upload files to begin.")
 
-
-
-    st.markdown(
+st.markdown(
     """
     <div style='text-align: center; margin-top: 50px; color: gray; font-size: 14px;'>
         © aurumz-rgb 2025 – AGPL-3.0 License.
