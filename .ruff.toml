@@ -1,9 +1,0 @@
-line-length = 120
-select = ["E", "F", "W", "I"]
-ignore = [
-    "E501", 
-    "W291", 
-]
-
-[per-file-ignores]
-"app.py" = ["F841"]  
