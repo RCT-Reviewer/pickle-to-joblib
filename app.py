@@ -129,3 +129,14 @@ if uploaded_files:
 
 else:
     st.warning("Please upload files to begin.")
+
+
+
+    st.markdown(
+    """
+    <div style='text-align: center; margin-top: 50px; color: gray; font-size: 14px;'>
+        © aurumz-rgb 2025 – AGPL-3.0 License.
+    </div>
+    """,
+    unsafe_allow_html=True
+)
