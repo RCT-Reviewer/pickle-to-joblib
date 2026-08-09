@@ -1,10 +1,12 @@
 
 import pickle
+
 import pytest
+
 from converter import (
-    format_bytes,
-    convert_pickle_to_joblib,
     calculate_reduction,
+    convert_pickle_to_joblib,
+    format_bytes,
     generate_output_filename,
 )
 
@@ -77,7 +79,7 @@ class TestConvertPickleToJoblib:
         data = [1, 2, 3, 4, 5]
         pickle_bytes = pickle.dumps(data)
         
-        joblib_bytes, orig_size, comp_size = convert_pickle_to_joblib(pickle_bytes)
+        _, orig_size, comp_size = convert_pickle_to_joblib(pickle_bytes)
         
         assert orig_size > 0
         assert comp_size > 0
@@ -92,7 +94,7 @@ class TestConvertPickleToJoblib:
         }
         pickle_bytes = pickle.dumps(data)
         
-        joblib_bytes, orig_size, comp_size = convert_pickle_to_joblib(pickle_bytes)
+        _, orig_size, comp_size = convert_pickle_to_joblib(pickle_bytes)
         
         assert orig_size > 0
         assert comp_size > 0
@@ -101,7 +103,7 @@ class TestConvertPickleToJoblib:
         data = {}
         pickle_bytes = pickle.dumps(data)
         
-        joblib_bytes, orig_size, comp_size = convert_pickle_to_joblib(pickle_bytes)
+        _, orig_size, comp_size = convert_pickle_to_joblib(pickle_bytes)
         
         assert orig_size > 0  
         assert comp_size > 0
@@ -111,7 +113,7 @@ class TestConvertPickleToJoblib:
         data = {"text": "hello world " * 1000}
         pickle_bytes = pickle.dumps(data)
         
-        joblib_bytes, orig_size, comp_size = convert_pickle_to_joblib(pickle_bytes, compress=3)
+        _, orig_size, comp_size = convert_pickle_to_joblib(pickle_bytes, compress=3)
         
         reduction = calculate_reduction(orig_size, comp_size)
         assert reduction > 0 
@@ -119,7 +121,7 @@ class TestConvertPickleToJoblib:
     def test_invalid_pickle_raises_exception(self):
         invalid_bytes = b"this is not a valid pickle"
         
-        with pytest.raises(Exception):
+        with pytest.raises(pickle.UnpicklingError):
             convert_pickle_to_joblib(invalid_bytes)
 
     def test_different_compress_levels(self):
