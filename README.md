@@ -69,6 +69,6 @@ python -m streamlit run app.py
 
 You can also use the hosted online version without installing anything locally.
 
-© aurumz-rgb 2025 – AGPL-3.0 License.
+© aurumz-rgb 2026 – AGPL-3.0 License.
 
 [aurumz-rgb's GitHub](https://github.com/aurumz-rgb)
